@@ -18,7 +18,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ГЛАВНОЕ: Бот сверяет время ТОЛЬКО по Перми.
-# Где стоит сервер (Новосибирск) — неважно, конвертация происходит автоматически.
 TARGET_TZ = ZoneInfo("Asia/Yekaterinburg")
 
 TOKEN = os.getenv("VK_TOKEN")
@@ -55,7 +54,6 @@ MORNING_MESSAGES = [
     """Привет, команда! ☕ Утро — время задать правильный ритм смене. Пусть всё идёт по чек-листам, без суеты и с отличным качеством.
 Цитата дня: „Лучший способ предсказать будущее — создать его“.
 Хорошей продуктивной смены! ✨""",
-    # Сюда можно вставить остальные твои утренние цитаты, список просто продолжай
 ]
 
 MESSAGES = {
@@ -111,13 +109,12 @@ CLOSING_MESSAGE = """Смена подходит к концу! 🌆
 # ================= ОТПРАВКА СООБЩЕНИЙ =================
 
 def send_message(text: str):
-    """Отправляет сообщение с уникальным random_id и логирует результат."""
     now_perm = datetime.datetime.now(TARGET_TZ)
     try:
         vk.messages.send(
             peer_id=PEER_ID,
             message=text,
-            random_id=get_random_id()  # Гарантированно уникальный ID
+            random_id=get_random_id()
         )
         logger.info(f"[Пермь {now_perm.strftime('%H:%M')}] ✅ Сообщение отправлено: {text[:40]}...")
     except Exception as e:
@@ -137,9 +134,8 @@ def send_by_time(time_key: str):
 
 def send_closing():
     now = datetime.datetime.now(TARGET_TZ)
-    weekday = now.weekday()  # 0=Пн, ..., 6=Вс
+    weekday = now.weekday()
     
-    # Будни (Пн-Чт, Вс) - закрытие в 22:20, Выходные (Пт, Сб) - 23:20
     is_weekday = weekday in (0, 1, 2, 3, 6)
     is_weekend = weekday in (4, 5)
 
@@ -147,7 +143,7 @@ def send_closing():
        (is_weekend and now.hour == 23 and now.minute == 20):
         send_message(CLOSING_MESSAGE)
 
-# ================= ПЛАНИРОВЩИК (ПРОСТОЙ ЦИКЛ) =================
+# ================= ПЛАНИРОВЩИК =================
 
 def run_scheduler():
     logger.info("🕒 Планировщик запущен. Следим за временем по Перми.")
@@ -165,15 +161,13 @@ def run_scheduler():
         (21, 30, "21:30"),
     ]
 
-    last_sent = set()  # Чтобы не отправить дважды в одну минуту
+    last_sent = set()
 
     while True:
         try:
-            # Получаем текущее время ПО ПЕРМИ
             now = datetime.datetime.now(TARGET_TZ)
             current_time_str = f"{now.hour:02d}:{now.minute:02d}"
             
-            # Проверка обычных напоминаний
             for hour, minute, msg_key in tasks:
                 if now.hour == hour and now.minute == minute:
                     if current_time_str not in last_sent:
@@ -182,27 +176,53 @@ def run_scheduler():
                         else:
                             send_by_time(msg_key)
                         last_sent.add(current_time_str)
-                        logger.debug(f"Задача выполнена для времени: {current_time_str}")
                     break 
             
-            # Проверка закрытия смены
             send_closing()
-
-            # Спит 30 секунд. Точность ±30 сек — тебе этого достаточно.
             time.sleep(30)
 
         except Exception as e:
             logger.error(f"🛑 Критическая ошибка в планировщике: {e}")
             time.sleep(60)
 
-# ================= ОБРАБОТКА КОМАНД (LONG POLL) =================
+# ================= ОБРАБОТКА КОМАНД (ИСПРАВЛЕНО!) =================
 
 def handle_command(event):
-    if not event.type == VkBotEventType.MESSAGE_NEW or not event.object.message:
+    # Самая надёжная проверка: работаем и с объектом, и со словарем
+    if event.type != VkBotEventType.MESSAGE_NEW:
         return
+
+    # Получаем объект сообщения универсально
+    message_obj = None
     
-    text = event.object.message.text.lower().strip()
-    peer_id = event.object.message.peer_id
+    # Вариант 1: если event — это объект vk_api (у него есть .object)
+    if hasattr(event, 'object'):
+        message_obj = event.object.message
+    # Вариант 2: если event — это словарь (частая проблема на хостингах)
+    elif isinstance(event, dict) and 'object' in event and 'message' in event['object']:
+        message_obj = event['object']['message']
+    else:
+        return  # Неизвестный формат — просто пропускаем
+
+    # Теперь безопасно достаём текст
+    text_raw = None
+    if isinstance(message_obj, dict):
+        text_raw = message_obj.get('text', '')
+    elif hasattr(message_obj, 'text'):
+        text_raw = message_obj.text
+    else:
+        return
+
+    text = str(text_raw or '').lower().strip()
+    
+    # Достаём peer_id тоже универсально
+    peer_id = None
+    if isinstance(message_obj, dict):
+        peer_id = message_obj.get('peer_id')
+    elif hasattr(message_obj, 'peer_id'):
+        peer_id = message_obj.peer_id
+    else:
+        return
 
     # Команда /время — отвечаем только если сообщение пришло в наш чат
     if peer_id == PEER_ID and text == "/время":
