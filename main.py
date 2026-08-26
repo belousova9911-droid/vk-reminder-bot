@@ -275,7 +275,7 @@ def run_scheduler():
     schedule.every().day.at("17:00").do(send_by_time, "17:00")
     schedule.every().day.at("18:30").do(send_by_time, "18:30")
     schedule.every().day.at("20:30").do(send_by_time, "20:30")
-    schedule.every().day.at("21:30").do(send_by_time, "21:30")
+    schedule.every().day.at("21:36").do(send_by_time, "21:30")
 
     schedule.every().day.at("22:20").do(send_closing)
     schedule.every().day.at("23:20").do(send_closing)
