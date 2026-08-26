@@ -14,16 +14,19 @@ PEER_ID = int(os.getenv("2000000001))    # Куда слать (peer_id чата
 if not all([TOKEN, GROUP_ID, PEER_ID]):
     raise ValueError("Не заданы VK_TOKEN, GROUP_ID или PEER_ID")
 
+# Часовой пояс Перми
+PERM_TZ = ZoneInfo("Asia/Yekaterinburg")
+
 # ================== ИНИЦИАЛИЗАЦИЯ ==================
 vk_session = vk_api.VkApi(token=TOKEN)
 vk = vk_session.get_api()
 longpoll = VkBotLongPoll(vk_session, GROUP_ID)
 
 def send_test():
-    """Отправляет сообщение 'тест', но только начиная с 11:00"""
-    now = datetime.now()
+    """Отправляет 'тест' каждые 10 минут, начиная с 11:00 по Перми"""
+    now = datetime.now(PERM_TZ)
     
-    # Отправляем только после 11:00
+    # Отправляем только с 11:00 по Перми
     if now.hour < 11:
         return
     
@@ -33,16 +36,15 @@ def send_test():
             message="тест",
             random_id=0
         )
-        print(f"[{now.strftime('%H:%M:%S')}] Отправлено: тест")
+        print(f"[{now.strftime('%H:%M:%S')} Пермь] Отправлено: тест")
     except Exception as e:
-        print(f"[{now.strftime('%H:%M:%S')}] Ошибка отправки: {e}")
+        print(f"[{now.strftime('%H:%M:%S')} Пермь] Ошибка отправки: {e}")
 
 def run_scheduler():
-    """Запускает планировщик в отдельном потоке"""
-    # Каждые 10 минут
+    """Планировщик в отдельном потоке"""
     schedule.every(10).minutes.do(send_test)
     
-    # Сразу при старте тоже проверим (если уже после 11:00)
+    # Проверяем сразу при запуске
     send_test()
     
     while True:
@@ -51,15 +53,13 @@ def run_scheduler():
 
 # ================== ЗАПУСК ==================
 print("Бот запускается...")
+print(f"Текущее время по Перми: {datetime.now(PERM_TZ).strftime('%H:%M:%S')}")
 
-# Планировщик в фоне
 scheduler_thread = threading.Thread(target=run_scheduler, daemon=True)
 scheduler_thread.start()
 
-print("Планировщик запущен. Long Poll слушает...")
+print("Планировщик запущен (время по Перми). Long Poll слушает...")
 
-# Long Poll (держим процесс живым)
 for event in longpoll.listen():
     if event.type == VkBotEventType.MESSAGE_NEW and event.object.message:
-        # Здесь можно добавить обработку команд, если понадобится
         pass
