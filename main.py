@@ -6,10 +6,9 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from datetime import datetime
 
-# ================== НАСТРОЙКИ (через переменные окружения) ==================
-TOKEN = os.getenv("vk1.a.bdwEBSnWHqwRb1dVhD55g92MJq8rl2WrOj0onZHZTymVFt0l_pF7yKZf-Bp5Pn3k_or48t493-K2Kfkhbv-qbsI7Z_T3YNs60HJty5TBPnUyRXS-QEUdfcyssP6u2lHdB31SSg79BYbqRd5XIHtlwCl3JOZWgoL1KbEmHjhRjDAa6QSu6Un5DULs1qtIy5aVmUiVJgfBpYDmmMX5F6dm1g")          # Токен группы
-GROUP_ID = int(os.getenv("241055687"))  # ID группы (без минуса)
-PEER_ID = int(os.getenv("2000000001))    # Куда слать (peer_id чата)
+TOKEN = os.getenv("VK_TOKEN")
+GROUP_ID = int(os.getenv("GROUP_ID"))
+PEER_ID = int(os.getenv("PEER_ID"))
 
 if not all([TOKEN, GROUP_ID, PEER_ID]):
     raise ValueError("Не заданы VK_TOKEN, GROUP_ID или PEER_ID")
