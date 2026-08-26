@@ -5,7 +5,9 @@ import schedule
 import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 from datetime import datetime
+from zoneinfo import ZoneInfo          # ← эта строка обязательна
 
+# ================== НАСТРОЙКИ ==================
 TOKEN = os.getenv("VK_TOKEN")
 GROUP_ID = int(os.getenv("GROUP_ID"))
 PEER_ID = int(os.getenv("PEER_ID"))
