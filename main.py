@@ -106,14 +106,18 @@ def send_by_time(time_str: str):
 def send_closing():
     """Отправка сообщения о закрытии смены (с учётом будни/выходные)"""
     now = datetime.now(PERM_TZ)
-    weekday = now.weekday()  # 0 = понедельник, 6 = воскресенье
+    weekday = now.weekday()  # 0=пн, 1=вт, 2=ср, 3=чт, 4=пт, 5=сб, 6=вс
 
-    # 22:20 — только в будни (пн–пт)
-    if now.hour == 22 and now.minute == 20 and weekday < 5:
+    # Будни: воскресенье–четверг (вс, пн, вт, ср, чт) → 22:20
+    is_weekday = weekday in (6, 0, 1, 2, 3)
+
+    # Выходные: пятница и суббота → 23:20
+    is_weekend = weekday in (4, 5)
+
+    if now.hour == 22 and now.minute == 20 and is_weekday:
         send_message(CLOSING_MESSAGE)
 
-    # 23:20 — только в выходные (сб–вс)
-    elif now.hour == 23 and now.minute == 20 and weekday >= 5:
+    elif now.hour == 23 and now.minute == 20 and is_weekend:
         send_message(CLOSING_MESSAGE)
 
 def run_scheduler():
@@ -130,7 +134,7 @@ def run_scheduler():
 
     while True:
         schedule.run_pending()
-        time.sleep(20)  # проверяем каждые 20 секунд
+        time.sleep(20)
 
 # ================== ЗАПУСК ==================
 print("Бот запускается...")
