@@ -1,6 +1,5 @@
-✅ Готово! Вот полностью переписанный код — всё заново, ничего не нужно менять.
-Скопируй весь текст ниже и замени им свой файл main.py целиком (удали старый и вставь этот).
-Pythonimport os
+
+import os
 import time
 import threading
 import schedule
