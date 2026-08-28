@@ -1,6 +1,4 @@
-✅ Вот полностью исправленный код — ошибка с PEER_ID больше не будет.
-Скопируй весь текст ниже и замени им свой main.py целиком.
-Pythonimport os
+import os
 import time
 import random
 import logging
