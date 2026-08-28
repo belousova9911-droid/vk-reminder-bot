@@ -9,7 +9,8 @@ import vk_api
 # ================= НАСТРОЙКИ =================
 TOKEN = os.getenv("VK_TOKEN", "ТВОЙ_ТОКЕН_ЗДЕСЬ")
 GROUP_ID = int(os.getenv("GROUP_ID", 241055687))
-PEER_ID = 2000000001
+# Три чата
+PEER_IDs = [2000000001, 2000000002, 2000000003]
 
 TIMEZONE = ZoneInfo("Asia/Yekaterinburg")
 
