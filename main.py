@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 import vk_api
 
 # ================= НАСТРОЙКИ =================
-TOKEN = os.getenv("VK_TOKEN", "vk1.a.bdwEBSnWHqwRb1dVhD55g92MJq8rl2WrOj0onZHZTymVFt0l_pF7yKZf-Bp5Pn3k_or48t493-K2Kfkhbv-qbsI7Z_T3YNs60HJty5TBPnUyRXS-QEUdfcyssP6u2lHdB31SSg79BYbqRd5XIHtlwCl3JOZWgoL1KbEmHjhRjDAa6QSu6Un5DULs1qtIy5aVmUiVJgfBpYDmmMX5F6dm1g")
+TOKEN = os.getenv("VK_TOKEN", "vk1.a.4OnPAtK9wtYFprDqBNfAgN5Ibz-8F3zAjcvZOZ-5w2DM3ADmBEWZ_TZMqWqtSIxepkWXDIWkBFtv_dYRN_jz3yBklZDYTGhSjaJevFCRG5nUQwgDbidv0HWXnoTfILBYBdrhFks6XYxOXNJTd2tckihcTfg7wFDPC82ahq85GGNU3ZyTpFw6RP5X_-5v5lkJdxc4rvAPepdRLB4NVHezKg")
 GROUP_ID = int(os.getenv("GROUP_ID", 241055687))
 
 # Три чата
